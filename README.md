@@ -107,3 +107,51 @@ aosp_rpi4_tv-ap2a-userdebug
 Kết quả build nằm trong:
 
 ~/aosp/source/out/target/product/...
+
+---
+
+### 4.6. Tạo image để flash cho Raspberry Pi 4
+
+Sau khi build thành công, AOSP sẽ tạo ra các image cần thiết cho Raspberry Pi 4
+trong thư mục output.
+
+#### 4.6.1. Thư mục output
+```bash
+~/aosp/source/out/target/product/rpi4/
+
+Các file quan trọng:
+
+boot.img – kernel + ramdisk
+
+system.img – hệ thống Android
+
+vendor.img – vendor partition
+
+userdata.img – dữ liệu người dùng
+
+*.img – image dùng để flash cho Raspberry Pi 4 (tùy cấu hình build)
+
+Tên file image có thể thay đổi tùy cấu hình device, nhưng đều nằm trong thư mục trên.
+
+
+Đối với AOSP trên Raspberry Pi 4, image dùng để flash vào thẻ SD
+được tạo thông qua script chuyên dụng `rpi4-mkimg.sh`.
+
+Script này sẽ gom các partition cần thiết (boot, system, vendor, userdata…)
+thành một file image duy nhất để flash cho Raspberry Pi 4.
+
+Thực hiện:
+
+```bash
+cd ~/aosp/source
+./rpi4-mkimg.sh
+
+
+
+---
+
+## 📌 LƯU Ý KỸ THUẬT (rất nên giữ trong README)
+- `rpi4-mkimg.sh` **chỉ chạy sau khi build AOSP thành công**
+- Đây là bước **bắt buộc** để tạo image flashable cho thẻ SD
+
+
