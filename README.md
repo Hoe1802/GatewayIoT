@@ -282,3 +282,138 @@ Kết quả mong đợi:
 
 List of devices attached
 192.168.1.100:5555   device
+
+
+---
+
+## 5. Cài đặt Node-RED và Mosquitto trên Gateway bằng Termux
+
+Trong đồ án, **Node-RED** và **Mosquitto MQTT Broker** được cài đặt
+và chạy trực tiếp trên **Gateway (Raspberry Pi 4 – Android TV)**
+thông qua môi trường **Termux**.
+
+Giải pháp này cho phép:
+- Chạy dịch vụ IoT trực tiếp trên AOSP
+- Không cần root Android
+- Phù hợp cho mục đích học tập và nghiên cứu
+
+---
+
+### 5.1. Cài đặt Termux trên Android TV (Raspberry Pi 4)
+
+#### 5.1.1. Chuẩn bị file APK
+Trong quá trình thực hiện đồ án, Termux được cài đặt bằng **hai file APK chính thức**:
+
+- `com.termux_1022.apk`
+- `com.termux.api_1002.apk`
+
+Các file này được tải từ:
+
+https://github.com/termux/termux-app/releases
+
+
+---
+
+#### 5.1.2. Cài đặt Termux bằng ADB
+
+Kết nối ADB tới Raspberry Pi 4:
+```bash
+adb connect <IP_RPI>:5555
+adb devices
+
+Chép APK vào thiết bị:
+
+adb push com.termux_1022.apk /data/local/tmp/
+adb push com.termux.api_1002.apk /data/local/tmp/
+
+
+Cài đặt APK:
+
+adb install /data/local/tmp/com.termux_1022.apk
+adb install /data/local/tmp/com.termux.api_1002.apk
+
+
+Sau khi cài đặt hoàn tất, Termux sẽ xuất hiện trong danh sách ứng dụng.
+
+
+####5.1.3. Khởi động Termux
+
+Mở ứng dụng Termux trên Android TV
+
+Một môi trường dòng lệnh Linux user-space sẽ được cung cấp
+
+###5.2. Chuẩn bị môi trường trong Termux
+
+Cập nhật hệ thống gói:
+
+pkg update
+pkg upgrade
+
+
+Cài các gói cần thiết:
+
+pkg install -y nodejs git python
+
+
+Kiểm tra:
+
+node -v
+npm -v
+
+
+###5.3. Cài đặt Mosquitto MQTT Broker trong Termux
+####5.3.1. Cài Mosquitto
+pkg install -y mosquitto
+
+
+Kiểm tra:
+
+mosquitto -v
+
+####5.3.2. Chạy Mosquitto
+mosquitto
+
+
+Mặc định:
+
+Port: 1883
+
+Broker chạy trong môi trường Termux
+
+###5.4. Cài đặt Node-RED trong Termux (local directory)
+####5.4.1. Tạo thư mục Node-RED
+mkdir -p ~/node-red
+cd ~/node-red
+
+
+Khởi tạo project Node.js:
+
+npm init -y
+
+####5.4.2. Cài Node-RED (local)
+npm install node-red
+
+
+Kiểm tra:
+
+npx node-red --version
+
+####5.4.3. Chạy Node-RED
+cd ~/node-red
+npx node-red
+
+
+Khi khởi động thành công, Node-RED sẽ hiển thị:
+
+Server now running at http://127.0.0.1:1880/
+
+###5.4.4. Truy cập Node-RED
+
+Trên Raspberry Pi 4:
+
+http://127.0.0.1:1880
+
+
+Trên máy khác trong mạng LAN:
+
+http://<IP_RPI>:1880
