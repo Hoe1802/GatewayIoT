@@ -11,7 +11,7 @@ apply() {
   if [ -d "$PATCH_ROOT/$patch_dir" ]; then
     echo "Applying patches for $proj_path"
     cd "$AOSP_ROOT/$proj_path"
-    git am "$PATCH_ROOT/$patch_dir"/*.patch
+    git am --whitespace=fix "$PATCH_ROOT/$patch_dir"/*.patch
     cd - >/dev/null
   else
     echo "No patches for $proj_path"
