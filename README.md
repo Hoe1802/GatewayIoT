@@ -134,6 +134,7 @@ userdata.img – dữ liệu người dùng
 Tên file image có thể thay đổi tùy cấu hình device, nhưng đều nằm trong thư mục trên.
 
 
+#### 4.6.2 Tạo flashimage
 Đối với AOSP trên Raspberry Pi 4, image dùng để flash vào thẻ SD
 được tạo thông qua script chuyên dụng `rpi4-mkimg.sh`.
 
@@ -155,3 +156,129 @@ cd ~/aosp/source
 - Đây là bước **bắt buộc** để tạo image flashable cho thẻ SD
 
 
+###4.7. Flash AOSP image vào Raspberry Pi 4 bằng Raspberry Pi Imager
+
+Trong đồ án, image AOSP được flash vào thẻ SD
+bằng công cụ Raspberry Pi Imager (khuyến nghị sử dụng).
+
+####4.7.1. Chuẩn bị
+
+Raspberry Pi 4
+
+Thẻ SD ≥ 16GB
+
+Đầu đọc thẻ SD
+
+Máy tính cài Raspberry Pi Imager
+
+####4.7.2. Cài đặt Raspberry Pi Imager
+
+Tải Raspberry Pi Imager từ trang chính thức:
+
+https://www.raspberrypi.com/software/
+
+
+Cài đặt theo hướng dẫn cho hệ điều hành tương ứng
+(Ubuntu / Windows / macOS).
+
+####4.7.3. Flash image bằng Raspberry Pi Imager
+
+Thực hiện các bước sau:
+
+Mở Raspberry Pi Imager
+
+Chọn CHOOSE DEVICE → Raspberry Pi 4
+
+Chọn CHOOSE OS → Use custom
+
+Chọn file image đã tạo:
+
+rpi4_android_tv.img
+
+
+Chọn CHOOSE STORAGE → thẻ SD
+
+Nhấn WRITE để bắt đầu flash
+
+Quá trình flash sẽ mất vài phút tùy tốc độ thẻ SD.
+
+###4.7.4. Khởi động Raspberry Pi 4
+
+Tháo thẻ SD khỏi máy tính
+
+Gắn thẻ SD vào Raspberry Pi 4
+
+Kết nối màn hình HDMI
+
+Cấp nguồn cho Raspberry Pi 4
+
+Nếu build và flash thành công:
+
+Thiết bị sẽ khởi động vào Android TV
+
+Giao diện hiển thị trên màn hình
+
+Có thể tiếp tục cấu hình mạng và các dịch vụ IoT
+---
+
+### 4.8. ADB debug và kiểm thử trên Raspberry Pi 4
+
+ADB (Android Debug Bridge) được sử dụng để kiểm tra, debug và tương tác
+với hệ thống AOSP Android TV đang chạy trên Raspberry Pi 4.
+
+---
+
+#### 4.8.1. Chuẩn bị
+- Raspberry Pi 4 đã boot vào Android TV
+- Raspberry Pi 4 và máy tính cùng mạng LAN
+- Máy tính đã cài Android Platform Tools (adb)
+
+Cài adb trên Ubuntu:
+```bash
+sudo apt update
+sudo apt install -y android-tools-adb
+adb version
+####4.8.2. Bật ADB trên Android TV (RPi4)
+
+Trên giao diện Android TV:
+
+Vào Settings
+
+Chọn Device Preferences
+
+Chọn About
+
+Nhấn liên tục 7 lần vào Build number để bật Developer options
+
+Quay lại Device Preferences
+
+Vào Developer options
+
+Bật USB debugging
+
+Bật ADB over network (nếu có)
+
+####4.8.3. Kết nối ADB qua mạng (ADB over TCP/IP)
+
+Trên Raspberry Pi 4, xác định địa chỉ IP:
+
+Vào Settings → Network
+
+Hoặc kiểm tra qua router
+
+Giả sử IP của Raspberry Pi 4 là 192.168.1.100.
+
+Trên máy tính:
+
+adb connect 192.168.1.100:5555
+
+
+Kiểm tra kết nối:
+
+adb devices
+
+
+Kết quả mong đợi:
+
+List of devices attached
+192.168.1.100:5555   device
