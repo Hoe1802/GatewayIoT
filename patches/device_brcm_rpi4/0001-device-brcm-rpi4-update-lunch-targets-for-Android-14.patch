@@ -1,0 +1,105 @@
+From c6779ed468b071b9ed566e1c9b5f230c82682278 Mon Sep 17 00:00:00 2001
+From: thanhpv1999 <thanhpv174223@gmail.com>
+Date: Mon, 19 Jan 2026 22:27:50 +0700
+Subject: [PATCH] device/brcm/rpi4: update lunch targets for Android 14
+
+---
+ AndroidProducts.mk |  6 +++---
+ BoardConfig.mk     |  5 +++++
+ aosp_rpi4_tv.mk    | 19 +++++++++++++++++++
+ device.mk          | 18 ++++++++++++++++++
+ 4 files changed, 45 insertions(+), 3 deletions(-)
+
+diff --git a/AndroidProducts.mk b/AndroidProducts.mk
+index 4328459..f6a50e9 100644
+--- a/AndroidProducts.mk
++++ b/AndroidProducts.mk
+@@ -10,6 +10,6 @@ PRODUCT_MAKEFILES := \
+     $(LOCAL_DIR)/aosp_rpi4_tv.mk
+ 
+ COMMON_LUNCH_CHOICES := \
+-    aosp_rpi4-trunk_staging-userdebug \
+-    aosp_rpi4_car-trunk_staging-userdebug \
+-    aosp_rpi4_tv-trunk_staging-userdebug
++    aosp_rpi4-ap2a-userdebug \
++    aosp_rpi4_car-ap2a-userdebug \
++    aosp_rpi4_tv-ap2a-userdebug
+diff --git a/BoardConfig.mk b/BoardConfig.mk
+index d88fb37..377ae14 100644
+--- a/BoardConfig.mk
++++ b/BoardConfig.mk
+@@ -19,6 +19,11 @@ TARGET_2ND_CPU_ABI := armeabi-v7a
+ TARGET_2ND_CPU_ABI2 := armeabi
+ TARGET_2ND_CPU_VARIANT := generic
+ 
++# # Use Clang toolchain (AOSP 14)
++# TARGET_TOOLS_PREFIX := prebuilts/clang/host/linux-x86/clang-r510928/bin/llvm-
++# TARGET_CLANG := true
++# TARGET_USE_CLANG := true
++
+ # Bluetooth
+ BOARD_HAVE_BLUETOOTH := true
+ 
+diff --git a/aosp_rpi4_tv.mk b/aosp_rpi4_tv.mk
+index c5d487c..777a34a 100644
+--- a/aosp_rpi4_tv.mk
++++ b/aosp_rpi4_tv.mk
+@@ -39,3 +39,22 @@ PRODUCT_NAME := aosp_rpi4_tv
+ PRODUCT_BRAND := Raspberry
+ PRODUCT_MODEL := Pi 4
+ PRODUCT_MANUFACTURER := Raspberry
++
++# # Include NodeJS prebuilt
++# PRODUCT_PACKAGES += node
++# PRODUCT_HOST_PACKAGES += node_host
++
++# # Node-RED
++# PRODUCT_PACKAGES += \
++#     node-red-js \
++#     node-red
++    
++# =====================================================
++# Disable dexpreopt completely (AOSP 14 + rpi4)
++# =====================================================
++# WITH_DEXPREOPT := false
++# DEXPREOPT_DISABLED := true
++# PRODUCT_DEXPREOPT_USE_UFFD_GC := false
++# PRODUCT_DEXPREOPT_BOOT_IMAGE := false
++# PRODUCT_DEXPREOPT_GENERATE_PROFILE := false
++PRODUCT_PACKAGES += node-red
+diff --git a/device.mk b/device.mk
+index 4c46170..1beeebb 100644
+--- a/device.mk
++++ b/device.mk
+@@ -17,6 +17,14 @@ $(call inherit-product, $(SRC_TARGET_DIR)/product/updatable_apex.mk)
+ # API level
+ PRODUCT_SHIPPING_API_LEVEL := 34
+ 
++# Enable ADB over TCP for debug builds
++PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \
++    persist.adb.tcp.port=5555 \
++    service.adb.tcp.port=5555 \
++    persist.service.adb.enable=1 \
++    persist.sys.usb.config=adb \
++    ro.adb.secure=0
++
+ # Audio
+ PRODUCT_PACKAGES += \
+     android.hardware.audio.service \
+@@ -296,3 +304,13 @@ PRODUCT_COPY_FILES += \
+ 
+ # Window extensions
+ $(call inherit-product, $(SRC_TARGET_DIR)/product/window_extensions.mk)
++
++PRODUCT_PACKAGES += \
++    node
++
++PRODUCT_PACKAGES += \
++    nodered_conf \
++    nodered_runtime
++
++PRODUCT_PACKAGES += nodered-files
++
+-- 
+2.25.1
+
