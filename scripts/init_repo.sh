@@ -1,16 +1,24 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
-AOSP_ROOT=$HOME/aosp
+# Rebuild base AOSP exactly like the author used:
+MANIFEST_URL="https://android.googlesource.com/platform/manifest"
+TAG="android-14.0.0_r67"
 
-echo "[1/3] Create AOSP directory"
+AOSP_ROOT="$HOME/aosp/source"
+
+echo "[1/4] Create AOSP directory: $AOSP_ROOT"
 mkdir -p "$AOSP_ROOT"
 cd "$AOSP_ROOT"
 
-echo "[2/3] Init repo with locked manifest"
-repo init -u ../GatewayIoT/manifest/manifest.xml
+echo "[2/4] repo init (AOSP Android 14 tag: $TAG)"
+repo init -u "$MANIFEST_URL" -b "$TAG"
 
-echo "[3/3] Sync AOSP source"
-repo sync -j$(nproc)
+echo "[3/4] repo sync"
+repo sync -c -j"$(nproc)"
 
-echo "AOSP source initialized successfully"
+echo "[4/4] Done."
+echo "Next:"
+echo "  cd ~/GatewayIoT"
+echo "  ./scripts/apply_patches.sh"
+echo "  ./scripts/build.sh"
