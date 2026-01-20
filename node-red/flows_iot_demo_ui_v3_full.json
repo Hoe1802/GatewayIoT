@@ -1,0 +1,420 @@
+[
+    {
+        "id": "tab_demo_ui3_full",
+        "type": "tab",
+        "label": "IoT Demo - UI v3 Dark (FULL)",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "ui_css_global3_full",
+        "type": "ui_template",
+        "z": "tab_demo_ui3_full",
+        "group": "ui_grp_sensors3_full",
+        "name": "GLOBAL CSS (Dark Theme)",
+        "order": 0,
+        "width": "0",
+        "height": "0",
+        "format": "<style>\n  body, md-content { background: #070b14 !important; }\n  .nr-dashboard-cardpanel { background: transparent !important; }\n  .nr-dashboard-cardpanel .nr-dashboard-cardcontainer { padding: 12px 10px !important; }\n  .nr-dashboard-cardtitle { font-weight: 800 !important; letter-spacing: .2px; }\n\n  .card{\n    background: linear-gradient(180deg, rgba(17,24,39,.95), rgba(11,18,32,.92));\n    color:#e5e7eb; border-radius:18px; padding:14px 16px;\n    box-shadow:0 12px 28px rgba(0,0,0,.35);\n    border:1px solid rgba(255,255,255,.06);\n  }\n  .muted{opacity:.75;font-size:13px}\n  .big{font-size:32px;font-weight:900;letter-spacing:.2px}\n  .row{display:flex;gap:14px;align-items:center;justify-content:space-between}\n  .pill{display:inline-flex;align-items:center;gap:8px;padding:7px 12px;border-radius:999px;background:rgba(255,255,255,.08)}\n  .dot{width:10px;height:10px;border-radius:50%}\n\n  .nr-dashboard-button .md-button{\n    border-radius:999px !important;\n    text-transform:none !important;\n    font-weight:800 !important;\n    letter-spacing:.2px !important;\n    padding: 10px 16px !important;\n  }\n\n  .chartCard{\n    background: linear-gradient(180deg, rgba(17,24,39,.95), rgba(11,18,32,.92));\n    border-radius:18px; padding:10px 12px;\n    box-shadow:0 12px 28px rgba(0,0,0,.35);\n    border:1px solid rgba(255,255,255,.06);\n    color:#e5e7eb;\n  }\n</style>",
+        "storeOutMessages": false,
+        "fwdInMessages": false,
+        "resendOnRefresh": true,
+        "templateScope": "local",
+        "x": 240,
+        "y": 60,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "mqtt_dht_in3_full",
+        "type": "mqtt in",
+        "z": "tab_demo_ui3_full",
+        "name": "DHT11 raw",
+        "topic": "gateway/demo/dht",
+        "qos": "0",
+        "datatype": "auto-detect",
+        "broker": "broker_local3_full",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 140,
+        "y": 140,
+        "wires": [
+            [
+                "fn_parse_dht3_full"
+            ]
+        ]
+    },
+    {
+        "id": "fn_parse_dht3_full",
+        "type": "function",
+        "z": "tab_demo_ui3_full",
+        "name": "Parse DHT (string/object)",
+        "func": "let p = msg.payload;\nif (typeof p === 'string') {\n  p = p.trim();\n  try { p = JSON.parse(p); } catch(e) { return null; }\n}\nconst t = Number(p?.temp);\nconst h = Number(p?.hum);\nif (!Number.isFinite(t)) return null;\nreturn [ {payload:t}, Number.isFinite(h)?{payload:h}:null ];",
+        "outputs": 2,
+        "x": 390,
+        "y": 140,
+        "wires": [
+            [
+                "ui_temp_card3_full",
+                "fn_temp_to_chart3_full"
+            ],
+            [
+                "ui_hum_card3_full",
+                "fn_hum_to_chart3_full"
+            ]
+        ]
+    },
+    {
+        "id": "ui_temp_card3_full",
+        "type": "ui_template",
+        "z": "tab_demo_ui3_full",
+        "group": "ui_grp_sensors3_full",
+        "name": "Temp Card",
+        "order": 1,
+        "width": "6",
+        "height": "2",
+        "format": "<div class=\"card\">\n  <div class=\"row\">\n    <div>\n      <div class=\"muted\">Nhiệt độ hiện tại</div>\n      <div class=\"big\">{{msg.payload | number:1}} <span style=\"font-size:16px;font-weight:800;opacity:.9\">°C</span></div>\n      <div class=\"muted\" style=\"margin-top:6px\">Cập nhật realtime</div>\n    </div>\n    <div class=\"pill\"><span class=\"dot\" style=\"background:#60a5fa\"></span><span style=\"font-weight:900\">TEMP</span></div>\n  </div>\n</div>",
+        "storeOutMessages": true,
+        "fwdInMessages": true,
+        "resendOnRefresh": true,
+        "templateScope": "local",
+        "x": 650,
+        "y": 40,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "ui_hum_card3_full",
+        "type": "ui_template",
+        "z": "tab_demo_ui3_full",
+        "group": "ui_grp_sensors3_full",
+        "name": "Hum Card",
+        "order": 2,
+        "width": "6",
+        "height": "2",
+        "format": "<div class=\"card\">\n  <div class=\"row\">\n    <div>\n      <div class=\"muted\">Độ ẩm hiện tại</div>\n      <div class=\"big\">{{msg.payload | number:1}} <span style=\"font-size:16px;font-weight:800;opacity:.9\">%</span></div>\n      <div class=\"muted\" style=\"margin-top:6px\">DHT11 (demo)</div>\n    </div>\n    <div class=\"pill\"><span class=\"dot\" style=\"background:#22c55e\"></span><span style=\"font-weight:900\">HUM</span></div>\n  </div>\n</div>",
+        "storeOutMessages": true,
+        "fwdInMessages": true,
+        "resendOnRefresh": true,
+        "templateScope": "local",
+        "x": 690,
+        "y": 160,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "ui_temp_title3_full",
+        "type": "ui_template",
+        "z": "tab_demo_ui3_full",
+        "group": "ui_grp_sensors3_full",
+        "name": "Temp Chart Title",
+        "order": 3,
+        "width": "12",
+        "height": "1",
+        "format": "<div class=\"chartCard\">\n  <div style=\"display:flex;justify-content:space-between;align-items:center;padding:6px 6px 0 6px\">\n    <div style=\"font-weight:900;font-size:16px\">Nhiệt độ theo thời gian</div>\n    <div class=\"muted\">10 phút gần nhất</div>\n  </div>\n</div>",
+        "storeOutMessages": false,
+        "fwdInMessages": false,
+        "resendOnRefresh": true,
+        "templateScope": "local",
+        "x": 700,
+        "y": 240,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "fn_temp_to_chart3_full",
+        "type": "function",
+        "z": "tab_demo_ui3_full",
+        "name": "Temp -> chart",
+        "func": "msg.topic = 'Temp';\nreturn msg;",
+        "outputs": 1,
+        "x": 680,
+        "y": 120,
+        "wires": [
+            [
+                "ui_temp_chart3_full"
+            ]
+        ]
+    },
+    {
+        "id": "ui_temp_chart3_full",
+        "type": "ui_chart",
+        "z": "tab_demo_ui3_full",
+        "name": "Temp Chart",
+        "group": "ui_grp_sensors3_full",
+        "order": 4,
+        "width": "12",
+        "height": "5",
+        "label": "",
+        "chartType": "line",
+        "legend": "false",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "Chưa có dữ liệu...",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": "10",
+        "removeOlderPoints": "",
+        "removeOlderUnit": "60",
+        "cutout": 0,
+        "useOneColor": true,
+        "useUTC": false,
+        "colors": [
+            "#60a5fa"
+        ],
+        "outputs": 1,
+        "className": "",
+        "x": 890,
+        "y": 140,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "ui_hum_title3_full",
+        "type": "ui_template",
+        "z": "tab_demo_ui3_full",
+        "group": "ui_grp_sensors3_full",
+        "name": "Hum Chart Title",
+        "order": 5,
+        "width": "12",
+        "height": "1",
+        "format": "<div class=\"chartCard\">\n  <div style=\"display:flex;justify-content:space-between;align-items:center;padding:6px 6px 0 6px\">\n    <div style=\"font-weight:900;font-size:16px\">Độ ẩm theo thời gian</div>\n    <div class=\"muted\">10 phút gần nhất</div>\n  </div>\n</div>",
+        "storeOutMessages": false,
+        "fwdInMessages": false,
+        "resendOnRefresh": true,
+        "templateScope": "local",
+        "x": 700,
+        "y": 320,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "fn_hum_to_chart3_full",
+        "type": "function",
+        "z": "tab_demo_ui3_full",
+        "name": "Hum -> chart",
+        "func": "msg.topic = 'Hum';\nreturn msg;",
+        "outputs": 1,
+        "x": 630,
+        "y": 200,
+        "wires": [
+            [
+                "ui_hum_chart3_full"
+            ]
+        ]
+    },
+    {
+        "id": "ui_hum_chart3_full",
+        "type": "ui_chart",
+        "z": "tab_demo_ui3_full",
+        "name": "Hum Chart",
+        "group": "ui_grp_sensors3_full",
+        "order": 6,
+        "width": "12",
+        "height": "5",
+        "label": "",
+        "chartType": "line",
+        "legend": "false",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "Chưa có dữ liệu...",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": "10",
+        "removeOlderPoints": "",
+        "removeOlderUnit": "60",
+        "cutout": 0,
+        "useOneColor": true,
+        "useUTC": false,
+        "colors": [
+            "#22c55e"
+        ],
+        "outputs": 1,
+        "className": "",
+        "x": 890,
+        "y": 180,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "mqtt_led_state3_full",
+        "type": "mqtt in",
+        "z": "tab_demo_ui3_full",
+        "name": "LED state",
+        "topic": "gateway/demo/led/state",
+        "qos": "0",
+        "datatype": "auto-detect",
+        "broker": "broker_local3_full",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 140,
+        "y": 360,
+        "wires": [
+            [
+                "ui_led_card3_full"
+            ]
+        ]
+    },
+    {
+        "id": "ui_led_card3_full",
+        "type": "ui_template",
+        "z": "tab_demo_ui3_full",
+        "group": "ui_grp_light3_full",
+        "name": "LED Card",
+        "order": 1,
+        "width": "12",
+        "height": "2",
+        "format": "<div class=\"card\">\n  <div class=\"row\">\n    <div>\n      <div class=\"muted\">Trạng thái đèn</div>\n      <div class=\"big\" style=\"font-size:26px\">{{msg.payload}}</div>\n      <div class=\"muted\" style=\"margin-top:6px\">Đồng bộ từ ESP32 (retain)</div>\n    </div>\n    <div class=\"pill\">\n      <span class=\"dot\" style=\"background:{{(msg.payload==='ON')?'#22c55e':'#ef4444'}}\"></span>\n      <span style=\"font-weight:900\">{{(msg.payload==='ON')?'ON':'OFF'}}</span>\n    </div>\n  </div>\n</div>",
+        "storeOutMessages": true,
+        "fwdInMessages": true,
+        "resendOnRefresh": true,
+        "templateScope": "local",
+        "x": 420,
+        "y": 360,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "ui_btn_on3_full",
+        "type": "ui_button",
+        "z": "tab_demo_ui3_full",
+        "name": "ON Button",
+        "group": "ui_grp_light3_full",
+        "order": 2,
+        "width": "6",
+        "height": "1",
+        "passthru": false,
+        "label": "Bật đèn",
+        "tooltip": "",
+        "color": "#ffffff",
+        "bgcolor": "#16a34a",
+        "icon": "fa-lightbulb-o",
+        "payload": "ON",
+        "payloadType": "str",
+        "topic": "led",
+        "x": 390,
+        "y": 440,
+        "wires": [
+            [
+                "mqtt_led_set3_full"
+            ]
+        ]
+    },
+    {
+        "id": "ui_btn_off3_full",
+        "type": "ui_button",
+        "z": "tab_demo_ui3_full",
+        "name": "OFF Button",
+        "group": "ui_grp_light3_full",
+        "order": 3,
+        "width": "6",
+        "height": "1",
+        "passthru": false,
+        "label": "Tắt đèn",
+        "tooltip": "",
+        "color": "#ffffff",
+        "bgcolor": "#dc2626",
+        "icon": "fa-power-off",
+        "payload": "OFF",
+        "payloadType": "str",
+        "topic": "led",
+        "x": 390,
+        "y": 500,
+        "wires": [
+            [
+                "mqtt_led_set3_full"
+            ]
+        ]
+    },
+    {
+        "id": "mqtt_led_set3_full",
+        "type": "mqtt out",
+        "z": "tab_demo_ui3_full",
+        "name": "LED set",
+        "topic": "gateway/demo/led/set",
+        "qos": "",
+        "retain": "",
+        "broker": "broker_local3_full",
+        "x": 660,
+        "y": 480,
+        "wires": []
+    },
+    {
+        "id": "ui_grp_sensors3_full",
+        "type": "ui_group",
+        "name": "Cảm biến",
+        "tab": "ui_tab_demo3_full",
+        "order": 1,
+        "disp": true,
+        "width": "12",
+        "collapse": false
+    },
+    {
+        "id": "broker_local3_full",
+        "type": "mqtt-broker",
+        "name": "Mosquitto (Gateway)",
+        "broker": "192.168.1.8",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "ui_grp_light3_full",
+        "type": "ui_group",
+        "name": "Đèn",
+        "tab": "ui_tab_demo3_full",
+        "order": 2,
+        "disp": true,
+        "width": "12",
+        "collapse": false
+    },
+    {
+        "id": "ui_tab_demo3_full",
+        "type": "ui_tab",
+        "name": "IoT Demo",
+        "icon": "dashboard",
+        "order": 1,
+        "disabled": false,
+        "hidden": false
+    },
+    {
+        "id": "cc67f9c56a080ca7",
+        "type": "global-config",
+        "env": [],
+        "modules": {
+            "node-red-dashboard": "3.6.6"
+        }
+    }
+]
