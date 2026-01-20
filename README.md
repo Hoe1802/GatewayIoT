@@ -67,7 +67,8 @@ curl -fsSL https://storage.googleapis.com/git-repo-downloads/repo > ~/.bin/repo
 chmod +x ~/.bin/repo
 echo 'export PATH="$HOME/.bin:$PATH"' >> ~/.bashrc
 source ~/.bashrc
-###4.3. Tải source AOSP đúng phiên bản đã sử dụng trong đồ án
+---
+### **4.3. Tải source AOSP đúng phiên bản đã sử dụng trong đồ án**
 
 Phiên bản AOSP:
 
@@ -81,7 +82,11 @@ Script thực hiện:
 repo init với đúng manifest và tag
 
 repo sync để tải toàn bộ source AOSP
-4.4. Áp dụng patch cho Raspberry Pi 4
+
+---
+
+
+### 4.4. Áp dụng patch cho Raspberry Pi 4
 cd GatewayIoT
 ./scripts/apply_patches.sh
 Ghi chú:
