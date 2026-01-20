@@ -2,3 +2,7 @@
 # editor backup files
 *.save
 *~
+
+# large binaries
+apks/
+*.apk
