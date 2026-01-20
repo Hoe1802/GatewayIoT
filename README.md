@@ -46,9 +46,7 @@ GatewayIoT/
 
 > **Lưu ý quan trọng**  
 > Mã nguồn AOSP có dung lượng rất lớn (~100GB) nên **không được nộp trực tiếp**.  
-> Repo này cung cấp **manifest đã khóa phiên bản**, **patch**, và **script** để rebuild lại đúng phiên bản AOSP đã sử dụng trong đồ án.
-
----
+> Repo này chỉ cung cấp **manifest đã khóa phiên bản**, **patch**, và **script** để rebuild đúng phiên bản AOSP đã sử dụng trong đồ án.
 
 ### 4.1. Môi trường yêu cầu
 - Ubuntu 20.04 hoặc 22.04 (64-bit)
@@ -67,6 +65,7 @@ curl -fsSL https://storage.googleapis.com/git-repo-downloads/repo > ~/.bin/repo
 chmod +x ~/.bin/repo
 echo 'export PATH="$HOME/.bin:$PATH"' >> ~/.bashrc
 source ~/.bashrc
+
 ---
 ### **4.3. Tải source AOSP đúng phiên bản đã sử dụng trong đồ án**
 
