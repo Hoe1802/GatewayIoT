@@ -407,7 +407,7 @@ Khi khởi động thành công, Node-RED sẽ hiển thị:
 
 Server now running at http://127.0.0.1:1880/
 
-###5.4.4. Truy cập Node-RED
+####5.4.4. Truy cập Node-RED
 
 Trên Raspberry Pi 4:
 
@@ -417,3 +417,213 @@ http://127.0.0.1:1880
 Trên máy khác trong mạng LAN:
 
 http://<IP_RPI>:1880
+---
+
+## 6. Node-RED Flow (Import, cấu hình MQTT và chạy Dashboard)
+
+Flow Node-RED của đồ án được cung cấp dưới dạng file JSON trong thư mục:
+node-red/
+
+Flow thực hiện:
+- Nhận dữ liệu DHT11 từ ESP32 qua MQTT topic `gateway/demo/dht`
+- Tách `temp` và `hum` để hiển thị realtime (card) và biểu đồ 10 phút gần nhất
+- Điều khiển LED qua MQTT topic `gateway/demo/led/set` với payload `ON/OFF`
+- Hiển thị trạng thái LED đồng bộ từ ESP32 qua topic `gateway/demo/led/state` (retain)
+
+### 6.1. Chạy Mosquitto và Node-RED
+**Mosquitto (Termux):**
+```bash
+mosquitto -c ~/mosquitto.conf -v
+
+**Node-RED (Termux):**
+```bash
+cd ~/node-red
+npx node-red
+
+### 6.2. Import flow
+
+Mở Node-RED Editor:
+http://<IP_GATEWAY>:1880
+
+Menu (góc phải) → Import → Clipboard hoặc File
+
+Chọn file flow trong repo (ví dụ đặt tên):
+node-red/flows.json
+
+Nhấn Import → Deploy
+
+### 6.3. Cấu hình MQTT Broker trong flow
+
+Trong flow của bạn, MQTT Broker cấu hình là:
+
+Host: <IP>
+
+Port: 1883
+
+Name: Mosquitto (Gateway)
+
+Nếu IP Gateway thay đổi, chỉ cần sửa host trong cấu hình broker của Node-RED.
+
+### 6.4. Dashboard
+
+Sau khi Deploy, Dashboard truy cập tại:
+
+http://<IP_GATEWAY>:1880/ui
+
+### 6.5. Topic/payload dùng trong flow
+
+Sensor (ESP32 → Node-RED):
+
+Topic: gateway/demo/dht
+
+Payload: JSON (string hoặc object), ví dụ: {"temp":30.5,"hum":70.0}
+
+Điều khiển LED (Node-RED → ESP32):
+
+Topic: gateway/demo/led/set
+
+Payload: ON hoặc OFF
+
+Trạng thái LED (ESP32 → Node-RED, retain):
+
+Topic: gateway/demo/led/state
+
+Payload: ON hoặc OFF
+
+### 6.6. Kiểm thử nhanh bằng mosquitto client
+
+Subscribe toàn bộ topic demo:
+
+mosquitto_sub -v -h 127.0.0.1 -t "gateway/demo/#"
+
+
+Giả lập gửi dữ liệu DHT:
+
+mosquitto_pub -h 127.0.0.1 -t "gateway/demo/dht" -m '{"temp":30.5,"hum":70.0}'
+
+
+Bật/tắt LED:
+
+mosquitto_pub -h 127.0.0.1 -t "gateway/demo/led/set" -m "ON"
+mosquitto_pub -h 127.0.0.1 -t "gateway/demo/led/set" -m "OFF"
+
+## 7. ESP32 + MQTT (Nạp code và chạy demo)
+
+Mã nguồn ESP32 được cung cấp trong thư mục:
+
+esp32/
+
+
+Chức năng firmware:
+
+Kết nối Wi-Fi
+
+Kết nối MQTT broker 192.168.1.8:1883
+
+Đọc DHT11 (GPIO 4) và publish JSON lên gateway/demo/dht mỗi ~2 giây
+
+Nhận lệnh điều khiển LED qua gateway/demo/led/set (ON/OFF)
+
+Publish trạng thái LED lên gateway/demo/led/state (retain)
+
+Publish trạng thái ONLINE/OFFLINE qua LWT topic gateway/demo/status
+
+Publish sự kiện nút nhấn lên gateway/demo/switch (payload PRESSED)
+
+Nút nhấn dùng INPUT_PULLUP, nhấn kéo xuống GND, interrupt FALLING, debounce 200ms
+
+### 7.1. Cấu hình cần chỉnh trong code trước khi nạp
+
+Trong file code ESP32, chỉnh đúng:
+
+Wi-Fi:
+
+WIFI_SSID
+
+WIFI_PASS
+
+MQTT:
+
+MQTT_HOST (IP Gateway, ví dụ 192.168.1.8)
+
+MQTT_PORT (1883)
+
+Topic trong code (đã đồng bộ với Node-RED flow):
+
+gateway/demo/dht
+
+gateway/demo/led/set
+
+gateway/demo/led/state
+
+gateway/demo/switch
+
+gateway/demo/status
+
+7.2. Mapping chân kết nối phần cứng (đúng theo code)
+
+DHT11 (module 3 chân):
+
+DATA → GPIO 4
+
+VCC → 3V3
+
+GND → GND
+
+LED:
+
+GPIO 2 → điện trở 220–330Ω → chân dài LED
+
+chân ngắn LED → GND
+
+Nút nhấn:
+
+1 chân → GPIO 27
+
+chân đối diện → GND
+
+cấu hình INPUT_PULLUP (không cần điện trở ngoài)
+
+### 7.3. Nạp firmware
+
+Mở project trong esp32/ bằng Arduino IDE hoặc PlatformIO:
+
+Chọn đúng board ESP32
+
+Cắm ESP32 và Upload
+
+### 7.4. Kiểm thử MQTT (debug)
+
+Trên Gateway/Termux, subscribe tất cả demo topic:
+
+mosquitto_sub -v -h 127.0.0.1 -t "gateway/demo/#"
+
+
+Kiểm tra các bản tin mong đợi:
+
+gateway/demo/status: ONLINE (retain) khi ESP32 kết nối MQTT
+
+gateway/demo/dht: JSON {"temp":..,"hum":..} định kỳ
+
+gateway/demo/led/state: ON/OFF (retain) khi có thay đổi
+
+gateway/demo/switch: PRESSED khi nhấn nút
+
+Test điều khiển LED thủ công:
+
+mosquitto_pub -h 127.0.0.1 -t "gateway/demo/led/set" -m "ON"
+mosquitto_pub -h 127.0.0.1 -t "gateway/demo/led/set" -m "OFF"
+
+### 7.5. Quy trình demo tổng hợp
+
+Flash AOSP lên RPi4 và boot Android TV
+
+Cài Termux + cài Mosquitto + Node-RED
+
+Chạy Mosquitto (Termux)
+
+Chạy Node-RED (Termux) và import flow
+
+Nạp code ESP32 (trỏ MQTT_HOST về IP Gateway)
+
+Quan sát nhiệt độ/độ ẩm trên Dashboard và thử bật/tắt LED
